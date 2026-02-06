@@ -13,7 +13,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "better-auth": "^1.0.7",
-    "@auth/core": "^0.37.2"
+    "@auth/core": "^0.37.2",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "@types/node": "^20",

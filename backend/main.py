@@ -29,7 +29,8 @@ app = FastAPI(
 
 # Get allowed origins from environment variable
 # Default to localhost for development
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+# Default to allow all origins (*) for immediate connectivity
+CORS_ORIGINS = ["*"]
 
 app.add_middleware(
     CORSMiddleware,

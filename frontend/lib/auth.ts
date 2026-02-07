@@ -18,6 +18,14 @@ export const auth = betterAuth({
     requireEmailVerification: false, // Disabled for hackathon simplicity
   },
 
+  // Social Providers
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
+
   // Secret for signing JWT tokens (MUST match backend)
   secret: process.env.BETTER_AUTH_SECRET!,
 

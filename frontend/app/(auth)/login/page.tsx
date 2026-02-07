@@ -17,21 +17,34 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // MOCK LOGIN IMPLEMENTATION
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Call Better Auth login endpoint
+      const response = await fetch("/api/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const mockToken = "mock-jwt-token-xyz-123";
-      const mockUserId = "mock-user-123";
+      if (!response.ok) {
+        throw new Error("Invalid email or password");
+      }
 
-      localStorage.setItem("auth_token", mockToken);
-      localStorage.setItem("user_id", mockUserId);
+      const data = await response.json();
 
+      // Store JWT token and user ID in localStorage
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("user_id", data.user.id);
+
+      // Redirect to dashboard
       router.push("/dashboard");
     } catch (err) {
-      setError("Mock login failed (this shouldn't happen)");
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = "/api/auth/sign-in/social?provider=google";
   };
 
   return (
@@ -92,6 +105,34 @@ export default function LoginPage() {
                 </p>
               </div>
             )}
+
+            {/* Google Sign In */}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-full py-4 glass rounded-xl font-semibold text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-gray-800/70 hover-lift transition-all duration-300 border-2 border-gray-200 dark:border-gray-600 hover:border-primary-500/30"
+            >
+              <span className="flex items-center justify-center gap-3">
+                <img
+                  className="h-6 w-6"
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google logo"
+                />
+                Continue with Google
+              </span>
+            </button>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white/50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 backdrop-blur-sm rounded-full">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -177,13 +218,6 @@ export default function LoginPage() {
                 </svg>
               </Link>
             </div>
-          </div>
-
-          {/* Mock Auth Notice */}
-          <div className="mt-6 p-4 glass rounded-xl text-center">
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              🎭 <strong>Demo Mode:</strong> Enter any credentials to continue
-            </p>
           </div>
         </div>
       </div>

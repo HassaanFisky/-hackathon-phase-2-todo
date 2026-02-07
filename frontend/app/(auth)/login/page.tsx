@@ -17,27 +17,22 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Call Better Auth login endpoint
-      const response = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // MOCK LOGIN IMPLEMENTATION
+      // Simulating network delay for realism
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      if (!response.ok) {
-        throw new Error("Invalid email or password");
-      }
+      // Mock user data
+      const mockToken = "mock-jwt-token-xyz-123";
+      const mockUserId = "mock-user-123";
 
-      const data = await response.json();
-
-      // Store JWT token and user ID in localStorage
-      localStorage.setItem("auth_token", data.token);
-      localStorage.setItem("user_id", data.user.id);
+      // Store in localStorage as if real auth happened
+      localStorage.setItem("auth_token", mockToken);
+      localStorage.setItem("user_id", mockUserId);
 
       // Redirect to dashboard
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError("Mock login failed (this shouldn't happen)");
     } finally {
       setLoading(false);
     }

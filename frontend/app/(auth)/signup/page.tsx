@@ -17,36 +17,23 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
 
-    // Validate password length
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      setLoading(false);
-      return;
-    }
-
     try {
-      // Call Better Auth signup endpoint
-      const response = await fetch("/api/auth/sign-up", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
+      // MOCK SIGNUP IMPLEMENTATION
+      // Simulating network delay for realism
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Signup failed");
-      }
+      // Mock user data (same as login so they can access same data)
+      const mockToken = "mock-jwt-token-xyz-123";
+      const mockUserId = "mock-user-123";
 
-      const data = await response.json();
-
-      // Store JWT token and user ID in localStorage
-      localStorage.setItem("auth_token", data.token);
-      localStorage.setItem("user_id", data.user.id);
+      // Store in localStorage as if real auth happened
+      localStorage.setItem("auth_token", mockToken);
+      localStorage.setItem("user_id", mockUserId);
 
       // Redirect to dashboard
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      setError("Mock signup failed (this shouldn't happen)");
     } finally {
       setLoading(false);
     }

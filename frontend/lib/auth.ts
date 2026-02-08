@@ -1,12 +1,16 @@
-import { betterAuth } from "better-auth";
-import { PrismaClient } from "@prisma/client";
-import { prismaAdapter } from "better-auth/adapters/prisma";
+/**
+ * Better Auth configuration
+ * Handles user authentication with JWT tokens
+ */
 
-const prisma = new PrismaClient();
+import { betterAuth } from "better-auth";
+import { Pool } from "pg";
 
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
+  // Database configuration
+  // Using standard pg Pool which works with Neon -pooler connection string
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL,
   }),
 
   // Enable email/password authentication

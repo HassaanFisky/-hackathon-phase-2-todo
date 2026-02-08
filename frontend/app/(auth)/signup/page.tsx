@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -156,52 +158,39 @@ export default function SignupPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  className="input-field"
-                  required
-                />
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Input
+                label="Full Name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                required
+              />
 
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="input-field"
-                  required
-                />
-              </div>
+              <Input
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+              />
 
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Password
-                </label>
-                <input
+              <div className="space-y-4">
+                <Input
+                  label="Password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="input-field"
                   required
                   minLength={8}
                 />
 
                 {/* Password Strength Indicator */}
                 {password.length > 0 && (
-                  <div className="space-y-2 animate-slide-up">
+                  <div className="space-y-2 animate-slide-up px-1">
                     <div className="flex gap-1">
                       {[1, 2, 3].map((level) => (
                         <div
@@ -215,37 +204,27 @@ export default function SignupPage() {
                       ))}
                     </div>
                     <p
-                      className={`text-xs font-medium transition-colors ${
+                      className={`text-xs font-black transition-colors ${
                         passwordStrength.strength === 1
-                          ? "text-red-600"
+                          ? "text-red-500"
                           : passwordStrength.strength === 2
-                            ? "text-yellow-600"
-                            : "text-green-600"
+                            ? "text-amber-500"
+                            : "text-emerald-500"
                       }`}
                     >
-                      Password Strength: {passwordStrength.label}
+                      Security Level: {passwordStrength.label.toUpperCase()}
                     </p>
                   </div>
                 )}
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-lg shadow-large hover:shadow-glow hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
+                isLoading={loading}
+                className="w-full py-4 text-lg"
               >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating account...
-                  </div>
-                ) : (
-                  <>
-                    <span className="relative z-10">Create Account</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </>
-                )}
-              </button>
+                Create Account
+              </Button>
             </form>
 
             {/* Divider */}

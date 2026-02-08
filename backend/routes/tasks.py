@@ -8,8 +8,12 @@ from sqlmodel import Session, select
 from typing import List, Optional
 from datetime import datetime
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from models import Task, TaskCreate, TaskUpdate, TaskResponse
-from database import get_session
+from db import get_session
 from auth import verify_token, verify_user_access
 
 # Create API router

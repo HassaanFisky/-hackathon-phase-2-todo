@@ -6,8 +6,8 @@ GIAIC Hackathon II
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import create_db_and_tables
-from routes import router
+from db import create_db_and_tables
+from routes import tasks_router
 import os
 from dotenv import load_dotenv
 
@@ -44,7 +44,7 @@ app.add_middleware(
 # Include API Routes
 # ============================================================================
 
-app.include_router(router)
+app.include_router(tasks_router)
 
 # ============================================================================
 # Startup Event - Database Initialization

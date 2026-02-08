@@ -4,12 +4,14 @@
  */
 
 import { betterAuth } from "better-auth";
-import { Pool } from "@neondatabase/serverless";
 
 // Export config separately for migrations
 export const authConfig = {
-  // Database configuration (using Neon serverless driver)
-  database: new Pool({ connectionString: process.env.DATABASE_URL }),
+  // Database configuration
+  database: {
+    provider: "postgres" as const,
+    url: process.env.DATABASE_URL!,
+  },
 
   // Enable email/password authentication
   emailAndPassword: {

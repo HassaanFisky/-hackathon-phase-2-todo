@@ -5,10 +5,11 @@
 
 import { betterAuth } from "better-auth";
 
-export const auth = betterAuth({
+// Export config separately for migrations
+export const authConfig = {
   // Database configuration
   database: {
-    provider: "postgres",
+    provider: "postgres" as const,
     url: process.env.DATABASE_URL!,
   },
 
@@ -37,7 +38,9 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // Update every 24 hours
   },
-});
+};
+
+export const auth = betterAuth(authConfig);
 
 // Export session type for TypeScript
 export type Session = typeof auth.$Infer.Session;

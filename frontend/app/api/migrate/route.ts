@@ -1,13 +1,12 @@
 import { getMigrations } from "better-auth/db";
-import { auth } from "@/lib/auth";
+import { authConfig } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const { toBeCreated, toBeAdded, runMigrations } = await getMigrations(
-      auth.options,
-    );
+    const { toBeCreated, toBeAdded, runMigrations } =
+      await getMigrations(authConfig);
 
     if (toBeCreated.length === 0 && toBeAdded.length === 0) {
       return Response.json({

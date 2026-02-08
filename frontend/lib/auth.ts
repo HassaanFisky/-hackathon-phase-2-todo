@@ -1,17 +1,13 @@
-/**
- * Better Auth configuration
- * Handles user authentication with JWT tokens
- */
-
 import { betterAuth } from "better-auth";
+import { PrismaClient } from "@prisma/client";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 
-// Export config separately for migrations
-export const authConfig = {
-  // Database configuration
-  database: {
-    provider: "postgres" as const,
-    url: process.env.DATABASE_URL!,
-  },
+const prisma = new PrismaClient();
+
+export const auth = betterAuth({
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
 
   // Enable email/password authentication
   emailAndPassword: {
@@ -38,9 +34,7 @@ export const authConfig = {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // Update every 24 hours
   },
-};
-
-export const auth = betterAuth(authConfig);
+});
 
 // Export session type for TypeScript
 export type Session = typeof auth.$Infer.Session;

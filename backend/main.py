@@ -46,6 +46,9 @@ app.add_middleware(
 
 app.include_router(tasks_router)
 
+from routes.intent import intent_router
+app.include_router(intent_router)
+
 # ============================================================================
 # Startup Event - Database Initialization
 # ============================================================================

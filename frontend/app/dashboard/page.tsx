@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input"; // Used for editing, not creating
 import { IntentInput } from "@/components/IntentInput";
+import { authService } from "@/lib/auth-service";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -107,11 +108,11 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user_id");
     apiClient.clearToken();
-    router.push("/");
+    await authService.logout();
   };
 
   const pendingCount = tasks.filter((t) => !t.completed).length;

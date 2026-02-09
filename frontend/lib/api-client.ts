@@ -1,141 +1,91 @@
-/**
- * Backend API client
- * Handles all communication with FastAPI backend
- */
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+let authToken: string | null = null;
 
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
-}
+async function request(endpoint: string, options: RequestInit = {}) {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
 
-export interface Task {
-  id: number;
-  user_id: string;
-  title: string;
-  description: string | null;
-  completed: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export class ApiClient {
-  private token: string | null = null;
-
-  /**
-   * Set JWT token for authenticated requests
-   */
-  setToken(token: string) {
-    this.token = token;
+  if (authToken) {
+    headers["Authorization"] = `Bearer ${authToken}`;
+  }
+  
+  // Also check localStorage if token is missing (fallback for hydration)
+  if (!authToken && typeof window !== 'undefined') {
+      const stored = localStorage.getItem('auth_token');
+      if (stored) {
+          authToken = stored; // Cache it
+          headers["Authorization"] = `Bearer ${stored}`;
+      }
   }
 
-  /**
-   * Clear JWT token (for logout)
-   */
-  clearToken() {
-    this.token = null;
-  }
-
-  /**
-   * Internal method to make HTTP requests
-   */
-  private async request(endpoint: string, options: RequestInit = {}) {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      ...(this.token && { Authorization: `Bearer ${this.token}` }),
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...headers,
       ...options.headers,
-    };
+    },
+  });
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
-
-    // Handle different HTTP status codes
+  if (!response.ok) {
     if (response.status === 401) {
-      throw new Error("Unauthorized - please log in again");
+        // Unauthorized - Clear token
+        if (typeof window !== 'undefined') {
+             localStorage.removeItem('auth_token');
+        }
     }
-
-    if (response.status === 403) {
-      throw new Error("Forbidden - access denied");
-    }
-
-    if (response.status === 404) {
-      throw new Error("Not found");
-    }
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || `HTTP ${response.status}`);
-    }
-
-    // 204 No Content responses have no body
-    if (response.status === 204) {
-      return null;
-    }
-
-    return response.json();
+    const errorBody = await response.text();
+    throw new Error(errorBody || `API Error: ${response.status}`);
   }
 
-  /**
-   * Get all tasks for a user
-   */
-  async getTasks(userId: string, status: string = "all"): Promise<Task[]> {
-    return this.request(`/api/${userId}/tasks?status=${status}`);
-  }
+  return response.json();
+}
 
-  /**
-   * Create a new task
-   */
-  async createTask(
-    userId: string,
-    data: { title: string; description?: string },
-  ): Promise<Task> {
-    return this.request(`/api/${userId}/tasks`, {
+export const apiClient = {
+  setToken: (token: string) => {
+    authToken = token;
+  },
+
+  clearToken: () => {
+    authToken = null;
+  },
+
+  getTasks: async (userId: string, filter: "all" | "pending" | "completed") => {
+    return request(`/api/tasks/${userId}?filter=${filter}`);
+  },
+
+  createTask: async (userId: string, task: { title: string; description?: string }) => {
+    return request(`/api/tasks/${userId}`, {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(task),
     });
-  }
+  },
 
-  /**
-   * Get a specific task
-   */
-  async getTask(userId: string, taskId: number): Promise<Task> {
-    return this.request(`/api/${userId}/tasks/${taskId}`);
-  }
-
-  /**
-   * Update a task
-   */
-  async updateTask(
-    userId: string,
-    taskId: number,
-    data: { title?: string; description?: string },
-  ): Promise<Task> {
-    return this.request(`/api/${userId}/tasks/${taskId}`, {
+  updateTask: async (userId: string, taskId: number, updates: { title?: string; description?: string }) => {
+    return request(`/api/tasks/${userId}/${taskId}`, {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: JSON.stringify(updates),
     });
-  }
+  },
 
-  /**
-   * Delete a task
-   */
-  async deleteTask(userId: string, taskId: number): Promise<void> {
-    return this.request(`/api/${userId}/tasks/${taskId}`, {
+  toggleComplete: async (userId: string, taskId: number) => {
+    return request(`/api/tasks/${userId}/${taskId}/toggle`, {
+      method: "PUT",
+    });
+  },
+
+  deleteTask: async (userId: string, taskId: number) => {
+    return request(`/api/tasks/${userId}/${taskId}`, {
       method: "DELETE",
     });
-  }
-
-  /**
-   * Toggle task completion
-   */
-  async toggleComplete(userId: string, taskId: number): Promise<Task> {
-    return this.request(`/api/${userId}/tasks/${taskId}/complete`, {
-      method: "PATCH",
+  },
+  
+  // Intent API
+  processIntent: async (input: string) => {
+    return request(`/api/intent`, {
+        method: "POST",
+        body: JSON.stringify({ input })
     });
   }
-}
-
-// Export singleton instance
-export const apiClient = new ApiClient();
+};

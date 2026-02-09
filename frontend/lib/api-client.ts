@@ -1,4 +1,10 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Production: Fail if API URL is missing
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) {
+  console.error(
+    "CRITICAL: NEXT_PUBLIC_API_URL is missing. API calls will fail.",
+  );
+}
 
 let authToken: string | null = null;
 
@@ -10,14 +16,14 @@ async function request(endpoint: string, options: RequestInit = {}) {
   if (authToken) {
     headers["Authorization"] = `Bearer ${authToken}`;
   }
-  
+
   // Also check localStorage if token is missing (fallback for hydration)
-  if (!authToken && typeof window !== 'undefined') {
-      const stored = localStorage.getItem('auth_token');
-      if (stored) {
-          authToken = stored; // Cache it
-          headers["Authorization"] = `Bearer ${stored}`;
-      }
+  if (!authToken && typeof window !== "undefined") {
+    const stored = localStorage.getItem("auth_token");
+    if (stored) {
+      authToken = stored; // Cache it
+      headers["Authorization"] = `Bearer ${stored}`;
+    }
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -30,10 +36,10 @@ async function request(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     if (response.status === 401) {
-        // Unauthorized - Clear token
-        if (typeof window !== 'undefined') {
-             localStorage.removeItem('auth_token');
-        }
+      // Unauthorized - Clear token
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token");
+      }
     }
     const errorBody = await response.text();
     throw new Error(errorBody || `API Error: ${response.status}`);
@@ -55,14 +61,21 @@ export const apiClient = {
     return request(`/api/tasks/${userId}?filter=${filter}`);
   },
 
-  createTask: async (userId: string, task: { title: string; description?: string }) => {
+  createTask: async (
+    userId: string,
+    task: { title: string; description?: string },
+  ) => {
     return request(`/api/tasks/${userId}`, {
       method: "POST",
       body: JSON.stringify(task),
     });
   },
 
-  updateTask: async (userId: string, taskId: number, updates: { title?: string; description?: string }) => {
+  updateTask: async (
+    userId: string,
+    taskId: number,
+    updates: { title?: string; description?: string },
+  ) => {
     return request(`/api/tasks/${userId}/${taskId}`, {
       method: "PUT",
       body: JSON.stringify(updates),
@@ -80,12 +93,12 @@ export const apiClient = {
       method: "DELETE",
     });
   },
-  
+
   // Intent API
   processIntent: async (input: string) => {
     return request(`/api/intent`, {
-        method: "POST",
-        body: JSON.stringify({ input })
+      method: "POST",
+      body: JSON.stringify({ input }),
     });
-  }
+  },
 };

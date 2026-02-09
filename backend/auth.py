@@ -23,15 +23,9 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
     )
     
     if not NEON_AUTH_ISSUER:
-        # Fallback for development if keys are missing (or mock auth)
-        try:
-            payload = jwt.get_unverified_claims(token)
-            user_id: str = payload.get("sub")
-            if user_id is None:
-                raise credentials_exception
-            return user_id
-        except JWTError:
-             raise credentials_exception
+        # Strict Production Mode: Fail if configuration is missing
+        print("CRITICAL: NEON_AUTH_ISSUER is not set. Authentication will fail.")
+        raise credentials_exception
 
     try:
         # Fetch JWKS (Cache this in production!)
@@ -42,9 +36,9 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
             token,
             jwks,
             algorithms=["RS256"],
-            audience=os.getenv("NEON_AUTH_CLIENT_ID"), 
-            issuer=NEON_AUTH_ISSUER
-        )
+        audience=os.getenv("NEON_AUTH_CLIENT_ID"), 
+        issuer=NEON_AUTH_ISSUER
+    )
         
         user_id: str = payload.get("sub")
         if user_id is None:
